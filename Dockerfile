@@ -9,7 +9,7 @@ RUN apk --no-cache add nodejs
 LABEL maintainer="fehguy"
 
 ENV API_KEY "**None**"
-ENV SWAGGER_JSON "/app/swagger.json"
+ENV SWAGGER_JSON "/openapi.json"
 ENV PORT 8080
 ENV BASE_URL ""
 

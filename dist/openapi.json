@@ -1,0 +1,281 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "title" : "Stabilitas Critical Event Knowledge Graph API",
+    "description" : "This API provides a variety of ways to interact with the Stabilitas Critical Event Knowledge Graph (CEKG)\n",
+    "termsOfService" : "https://dashboard.stabilitas.io/public/privacy/StabilitasPrivacyPolicy.pdf'",
+    "contact" : {
+      "email" : "info@stabilitas.io"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version" : "1.0.0-oas3"
+  },
+  "externalDocs" : {
+    "description" : "Find out more about Stabilitas",
+    "url" : "https://dashboard.stabilitas.io/faq.php"
+  },
+  "servers" : [ {
+    "url" : "https://developer.stabilitas.io/1"
+  } ],
+  "security" : [ {
+    "api_key" : [ ]
+  } ],
+  "tags" : [ {
+    "name" : "Critical Events",
+    "description" : "Find critical events that have financial, operational or safety/security implications for an organization’s vested interests",
+    "externalDocs" : {
+      "description" : "Find out more",
+      "url" : "http://stabilitas.io"
+    }
+  } ],
+  "paths" : {
+    "/reports/search" : {
+      "post" : {
+        "tags" : [ "Critical Events" ],
+        "summary" : "Search for critical events near an asset",
+        "operationId" : "searchReportsNearAsset",
+        "requestBody" : {
+          "description" : "Search criteria for finding reports",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SearchObject"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "405" : {
+            "description" : "Invalid input"
+          }
+        }
+      }
+    },
+    "/reports/entitysearch" : {
+      "post" : {
+        "tags" : [ "Critical Events" ],
+        "summary" : "Search for critical events by entity name",
+        "operationId" : "searchReportsByEntity",
+        "requestBody" : {
+          "description" : "Search criteria for finding reports",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/EntitySearchObject"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "405" : {
+            "description" : "Invalid input"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "distance_units" : {
+        "type" : "string",
+        "enum" : [ "KM", "Miles" ]
+      },
+      "asset" : {
+        "type" : "object",
+        "properties" : {
+          "near_asset" : {
+            "$ref" : "#/components/schemas/near_asset"
+          },
+          "asset_name" : {
+            "$ref" : "#/components/schemas/asset_name"
+          },
+          "asset_type" : {
+            "$ref" : "#/components/schemas/asset_type"
+          },
+          "proximity" : {
+            "$ref" : "#/components/schemas/proximity"
+          }
+        }
+      },
+      "near_asset" : {
+        "type" : "array",
+        "items" : {
+          "$ref" : "#/components/schemas/near_asset_inner"
+        }
+      },
+      "asset_name" : {
+        "type" : "array",
+        "example" : [ "BANKERS LIFE FIELDHOUSE" ],
+        "items" : {
+          "type" : "string"
+        }
+      },
+      "asset_type" : {
+        "type" : "array",
+        "example" : [ "Amtrak" ],
+        "items" : {
+          "type" : "string"
+        }
+      },
+      "proximity" : {
+        "type" : "object",
+        "properties" : {
+          "distance" : {
+            "type" : "number",
+            "format" : "float",
+            "example" : 0.25
+          },
+          "unit" : {
+            "$ref" : "#/components/schemas/distance_units"
+          }
+        }
+      },
+      "direct_mention" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "example" : "President Trump"
+          },
+          "type" : {
+            "type" : "string",
+            "example" : "PERSON"
+          }
+        }
+      },
+      "intel" : {
+        "type" : "object",
+        "properties" : {
+          "asset" : {
+            "$ref" : "#/components/schemas/asset"
+          },
+          "direct_mention" : {
+            "$ref" : "#/components/schemas/direct_mention"
+          }
+        }
+      },
+      "time" : {
+        "required" : [ "end", "start" ],
+        "type" : "object",
+        "properties" : {
+          "start" : {
+            "type" : "string",
+            "example" : "2019-04-23T16:00:00"
+          },
+          "end" : {
+            "type" : "string",
+            "example" : "2019-04-25T18:00:00"
+          }
+        }
+      },
+      "incident" : {
+        "required" : [ "time" ],
+        "type" : "object",
+        "properties" : {
+          "time" : {
+            "$ref" : "#/components/schemas/time"
+          },
+          "label" : {
+            "type" : "array",
+            "example" : [ "Protest", "Earthquake", "Road Accident" ],
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "filters" : {
+        "required" : [ "incident", "intel" ],
+        "type" : "object",
+        "properties" : {
+          "incident" : {
+            "$ref" : "#/components/schemas/incident"
+          },
+          "intel" : {
+            "$ref" : "#/components/schemas/intel"
+          }
+        }
+      },
+      "SearchObject" : {
+        "required" : [ "filters" ],
+        "type" : "object",
+        "properties" : {
+          "filters" : {
+            "$ref" : "#/components/schemas/filters"
+          }
+        }
+      },
+      "EntitySearchObject" : {
+        "required" : [ "filters" ],
+        "type" : "object",
+        "properties" : {
+          "filters" : {
+            "$ref" : "#/components/schemas/entity_filters"
+          }
+        }
+      },
+      "entity_filters" : {
+        "required" : [ "incident", "intel" ],
+        "type" : "object",
+        "properties" : {
+          "incident" : {
+            "$ref" : "#/components/schemas/incident"
+          },
+          "intel" : {
+            "$ref" : "#/components/schemas/entity"
+          }
+        }
+      },
+      "entity" : {
+        "type" : "object",
+        "properties" : {
+          "direct_mention" : {
+            "$ref" : "#/components/schemas/direct_mention"
+          }
+        }
+      },
+      "ApiResponse" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "near_asset_inner" : {
+        "type" : "object",
+        "properties" : {
+          "lat" : {
+            "type" : "number",
+            "format" : "float",
+            "example" : -47.1234
+          },
+          "lon" : {
+            "type" : "number",
+            "format" : "float",
+            "example" : 122.1234
+          }
+        }
+      }
+    },
+    "securitySchemes" : {
+      "api_key" : {
+        "type" : "apiKey",
+        "name" : "key",
+        "in" : "query"
+      }
+    }
+  }
+}
