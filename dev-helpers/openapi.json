@@ -3,7 +3,7 @@
   "info" : {
     "title" : "Stabilitas Critical Event Knowledge Graph API",
     "description" : "This API provides a variety of ways to interact with the Stabilitas Critical Event Knowledge Graph (CEKG)\n",
-    "termsOfService" : "https://dashboard.stabilitas.io/public/privacy/StabilitasPrivacyPolicy.pdf'",
+    "termsOfService" : "https://dashboard.stabilitas.io/public/privacy/StabilitasPrivacyPolicy.pdf",
     "contact" : {
       "email" : "info@stabilitas.io"
     },

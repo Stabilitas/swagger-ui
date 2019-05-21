@@ -1,3 +1,20 @@
+## Stabilitas changes
+
+- To launch dev server locally run `npm run dev` and access it with http://localhost:3200/index.html.
+`index.html` is served from `/dev-helpers` folder. Paths to API definitions are in `swagger-api-urls.js` now.
+
+- When deployed to Kubernetes, all files (`index.html`, etc) are taken from `/dist` folder, they are slightly
+different then the dev versions. Docker container is built using `Dockerfile.stabilitas` (original docker related stuff
+is left unmodified to make it easier to merge updates from the upstream swagger-ui project). When docker container is built
+the `/dist` folder is rebuilt from sources every time. The file `/dist/swagger-api-urls.js` with API specs is meant to be
+overwritten from Kubernetes configmap so that they are relevant for particular Kubernetes cluster.
+
+- To merge latest updates from the upstream swagger-ui project:
+add upstream github repo as another git remote: `git remote add upstream https://github.com/swagger-api/swagger-ui.git`,
+fetch latest changes: `git fetch upstream`,
+and merge: `git merge upstream/master` (pay extra attention to merge conflicts).
+
+
 # <img src="https://raw.githubusercontent.com/swagger-api/swagger.io/wordpress/images/assets/SWU-logo-clr.png" height="80">
 
 [![NPM version](https://badge.fury.io/js/swagger-ui.svg)](http://badge.fury.io/js/swagger-ui)

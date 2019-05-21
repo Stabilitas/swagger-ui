@@ -1,0 +1,59 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: swagger-ui
+  labels:
+    beacon-app: swagger-ui
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: swagger-ui
+  template:
+    metadata:
+      labels:
+        app: swagger-ui
+        beacon-app: swagger-ui
+    spec:
+      serviceAccountName: beacon-apps-serviceaccount
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 1000
+      containers:
+      - name: swagger-ui
+        imagePullPolicy: Always
+        image: registry.gitlab.com/stabilitas/swagger-ui:{{ .Values.revision }}
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: swagger-api-urls
+          mountPath: /var/www/html/documentation/swagger-api-urls.js
+          subPath: swagger-api-urls.js
+        resources:
+          limits:
+            cpu: "0.1"
+            memory: "100Mi"
+          requests:
+            cpu: "0.02"
+            memory: "10Mi"
+      volumes:
+        - name: swagger-api-urls
+          configMap:
+            name: swagger-ui-configmap
+            items:
+            - key: swagger-api-urls.js
+              path: swagger-api-urls.js
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: "app"
+                  operator: In
+                  values:
+                  - swagger-ui
+              topologyKey: "kubernetes.io/hostname"
+      imagePullSecrets:
+        - name: regsecret

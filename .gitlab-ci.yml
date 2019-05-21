@@ -1,0 +1,68 @@
+image: registry.gitlab.com/stabilitas/base-images/ci-runner:latest
+
+services:
+  - docker:dind
+
+build:
+  stage: build
+  script:
+    - chmod -R go-w .
+    - docker build . -f Dockerfile.stabilitas -t $CI_REGISTRY_IMAGE --build-arg revision=$CI_COMMIT_SHA --build-arg GITHUB_CI_TOKEN=$CI_GITHUB_TOKEN
+    - docker tag $CI_REGISTRY_IMAGE $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker tag $CI_REGISTRY_IMAGE $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:latest
+
+container_scanning:
+  allow_failure: true
+  variables:
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    ANCHORE_TIMEOUT: 300
+    ANCHORE_FAIL_ON_POLICY: "true"
+  script:
+    - anchore-scan-image ${IMAGE_TAG}
+  artifacts:
+    when: always
+    paths:
+    - image-policy.json
+    - image-details.json
+    - image-vulnerabilities.json
+    - image-packages.json
+  only:
+    - production
+
+deploy_production:
+  stage: deploy
+  environment:
+    name: production
+    url: https://developer.stabilitas.io/documentation
+  script:
+    - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:production
+    - docker push $CI_REGISTRY_IMAGE:production
+    - source set-cluster && ./deploy.sh $CI_COMMIT_SHA
+  only:
+    - production
+
+deploy_staging:
+  stage: deploy
+  environment:
+    name: staging
+    url: https://developer.svstaging.net/documentation
+  script:
+    - source set-cluster && ./deploy.sh $CI_COMMIT_SHA
+  only:
+    - staging
+
+deploy_qa:
+  stage: deploy
+  environment:
+    name: qa
+    url: https://developer.stabilitas-qa.net/documentation
+  script:
+    - source set-cluster && ./deploy.sh $CI_COMMIT_SHA
+  only:
+    - qa
+
+before_script:
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
