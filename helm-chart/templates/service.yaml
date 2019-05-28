@@ -11,3 +11,27 @@ spec:
     targetPort: 8080
   selector:
     app: swagger-ui
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: swagger-ui
+spec:
+  podSelector:
+    matchLabels:
+      app: "swagger-ui"
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector: {}
+    - podSelector:
+        matchLabels:
+          kubernetes-ingress-controller: "true"
+      namespaceSelector:
+        matchLabels:
+          namespace: "kube-system"
+    ports:
+     - port: 8080
+       protocol: TCP
