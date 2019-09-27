@@ -3,7 +3,7 @@
   "info" : {
     "title" : "Stabilitas Critical Event Knowledge Graph API",
     "description" : "This API provides a variety of ways to interact with the Stabilitas Critical Event Knowledge Graph (CEKG)\n",
-    "termsOfService" : "https://dashboard.stabilitas.io/public/privacy/StabilitasPrivacyPolicy.pdf",
+    "termsOfService" : "https://dashboard.stabilitas.io/public/privacy/StabilitasPrivacyPolicy.pdf'",
     "contact" : {
       "email" : "info@stabilitas.io"
     },
@@ -117,7 +117,7 @@
       },
       "asset_type" : {
         "type" : "array",
-        "example" : [ "Amtrak" ],
+        "example" : [ "Amtrak", "Airport" ],
         "items" : {
           "type" : "string"
         }
@@ -128,7 +128,7 @@
           "distance" : {
             "type" : "number",
             "format" : "float",
-            "example" : 0.25
+            "example" : 1.0
           },
           "unit" : {
             "$ref" : "#/components/schemas/distance_units"
@@ -140,11 +140,9 @@
         "properties" : {
           "name" : {
             "type" : "string",
-            "example" : "President Trump"
           },
           "type" : {
             "type" : "string",
-            "example" : "PERSON"
           }
         }
       },
@@ -165,11 +163,11 @@
         "properties" : {
           "start" : {
             "type" : "string",
-            "example" : "2019-04-23T16:00:00"
+            "example" : "2019-09-03T12:00:00"
           },
           "end" : {
             "type" : "string",
-            "example" : "2019-04-25T18:00:00"
+            "example" : "2019-09-03T16:59:59"
           }
         }
       },
@@ -182,7 +180,7 @@
           },
           "label" : {
             "type" : "array",
-            "example" : [ "Protest", "Earthquake", "Road Accident" ],
+            "example" : ["Road Accident", "Protest", "Earthquake", "Wildfire", "Shooting", "Aircraft Accident"],
             "items" : {
               "type" : "string"
             }
