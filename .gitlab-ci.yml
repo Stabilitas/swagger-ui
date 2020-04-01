@@ -1,16 +1,22 @@
 image: registry.gitlab.com/stabilitas/base-images/ci-runner:latest
 
+variables:
+  DOCKER_HOST: tcp://docker:2376/
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_DRIVER: overlay2
+
 services:
-  - docker:dind
+  - docker:$DOCKER_DIND_VERSION
 
 build:
   stage: build
   script:
     - chmod -R go-w .
-    - docker build . -f Dockerfile.stabilitas -t $CI_REGISTRY_IMAGE --build-arg revision=$CI_COMMIT_SHA --build-arg GITHUB_CI_TOKEN=$CI_GITHUB_TOKEN
-    - docker tag $CI_REGISTRY_IMAGE $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
-    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
-    - docker tag $CI_REGISTRY_IMAGE $CI_REGISTRY_IMAGE:latest
+    - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA || (
+    -   docker build . -f Dockerfile.stabilitas -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA --build-arg revision=$CI_COMMIT_SHA --build-arg GITHUB_CI_TOKEN=$CI_GITHUB_TOKEN
+    -   docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - )
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:latest
     - docker push $CI_REGISTRY_IMAGE:latest
 
 container_scanning:
@@ -40,7 +46,7 @@ deploy_production:
     - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
     - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:production
     - docker push $CI_REGISTRY_IMAGE:production
-    - source set-cluster && ./deploy.sh $CI_COMMIT_SHA
+    - source set-cluster && /usr/local/bin/deploy.sh $CI_PROJECT_NAME $CI_COMMIT_SHA
   only:
     - production
 
@@ -50,7 +56,7 @@ deploy_staging:
     name: staging
     url: https://developer.svstaging.net/documentation
   script:
-    - source set-cluster && ./deploy.sh $CI_COMMIT_SHA
+    - source set-cluster && /usr/local/bin/deploy.sh $CI_PROJECT_NAME $CI_COMMIT_SHA
   only:
     - staging
 
@@ -60,7 +66,7 @@ deploy_qa:
     name: qa
     url: https://developer.stabilitas-qa.net/documentation
   script:
-    - source set-cluster && ./deploy.sh $CI_COMMIT_SHA
+    - source set-cluster && /usr/local/bin/deploy.sh $CI_PROJECT_NAME $CI_COMMIT_SHA
   only:
     - qa
 

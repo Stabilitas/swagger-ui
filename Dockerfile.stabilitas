@@ -1,20 +1,21 @@
 # ==============================================================================
 # NodeJS build stage:
-FROM node:10 as builder_nodejs
+FROM node:12-alpine as builder_nodejs
 
 RUN mkdir -p /app
 WORKDIR /app
 
-COPY package.json package-lock.json .babelrc swagger-config.yaml postcss.config.js make-webpack-config.js webpack*.config.js /app/
-COPY src/ /app/src
+COPY package.json package-lock.json .babelrc swagger-config.yaml /app/
+COPY src /app/src
 COPY dist /app/dist
+COPY webpack /app/webpack
 RUN npm install --ignore-scripts && npm rebuild node-sass && npm run build
 
 
 
 # ==============================================================================
 # Runtime container
-FROM alpine:3.9
+FROM alpine:3.11
 
 RUN apk update && apk upgrade \
  && adduser -u 1000 -D -H -s /sbin/nologin -g nginx nginx \
