@@ -42,10 +42,20 @@ deploy_production:
   environment:
     name: production
     url: https://developer.stabilitas.io/documentation
+  variables:
+    CONTAINER_REGISTRY: $CONTAINER_REGISTRY_PRODUCTION
+    AWS_ACCESS_KEY_ID: $CONTAINER_AWS_ACCESS_KEY_ID_PRODUCTION
+    AWS_SECRET_ACCESS_KEY: $CONTAINER_AWS_SECRET_ACCESS_KEY_PRODUCTION
   script:
     - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
     - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:production
     - docker push $CI_REGISTRY_IMAGE:production
+    - if [ ! -z $CONTAINER_REGISTRY ]; then
+    -   docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CONTAINER_REGISTRY/$CI_PROJECT_NAME:$CI_COMMIT_SHA
+    -   docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CONTAINER_REGISTRY/$CI_PROJECT_NAME:production
+    -   docker push $CONTAINER_REGISTRY/$CI_PROJECT_NAME:$CI_COMMIT_SHA
+    -   docker push $CONTAINER_REGISTRY/$CI_PROJECT_NAME:production
+    - fi
     - source set-cluster && /usr/local/bin/deploy.sh $CI_PROJECT_NAME $CI_COMMIT_SHA
   only:
     - production
